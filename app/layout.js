@@ -1,5 +1,6 @@
 import "./globals.css";
 import { Cormorant_Garamond, Inter } from "next/font/google";
+import { ShopProvider } from "@/components/ShopContext";
 
 const serif = Cormorant_Garamond({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--font-serif" });
 const sans = Inter({ subsets: ["latin"], variable: "--font-sans" });
@@ -19,7 +20,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${serif.variable} ${sans.variable}`}>
-      <body>{children}</body>
+      <body><ShopProvider>{children}</ShopProvider></body>
     </html>
   );
 }

@@ -1,16 +1,35 @@
-// Usage: npm run images   (needs internet). Then set BASE = "" in lib/data.js
 import { mkdir, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { categories, products } from "../lib/data.js";
 
-const BASE = "https://storefront-spark-34.lovable.app";
-const files = [
-  "hero-1-B2z4lJjJ.jpg", "hero-2-DDyqZI1-.jpg", "hero-3-B6ZBs93w.jpg", "hero-4-et-rb63o.jpg",
-  "p-gown-CZIofiwO.jpg", "p-coat-DW40Qt2x.jpg", "p-oxford-DHVFuLSr.jpg", "p-tote-t4q76JIN.jpg",
-  "p-watch-BdWWsDxJ.jpg", "p-ring-BPEgzelO.jpg", "p-headphones-DKNrXA9w.jpg",
+const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const assets = [
+  ...products.map(({ slug, sourceImage }) => ({
+    path: `public/images/products/${slug}.jpg`,
+    url: sourceImage,
+  })),
+  ...categories.map(({ slug, sourceHeroImage }) => ({
+    path: `public/images/categories/${slug}.jpg`,
+    url: sourceHeroImage,
+  })),
 ];
-await mkdir("public/assets", { recursive: true });
-for (const f of files) {
-  const res = await fetch(`${BASE}/assets/${f}`);
-  if (!res.ok) { console.error("Failed", f, res.status); continue; }
-  await writeFile(`public/assets/${f}`, Buffer.from(await res.arrayBuffer()));
-  console.log("Saved", f);
-}
+
+let nextIndex = 0;
+const worker = async () => {
+  while (nextIndex < assets.length) {
+    const asset = assets[nextIndex++];
+    const response = await fetch(asset.url);
+    if (!response.ok) throw new Error(`Image download failed (${response.status}): ${asset.url}`);
+    if (!response.headers.get("content-type")?.startsWith("image/")) {
+      throw new Error(`Image URL returned a non-image response: ${asset.url}`);
+    }
+    const target = resolve(projectRoot, asset.path);
+    await mkdir(dirname(target), { recursive: true });
+    await writeFile(target, Buffer.from(await response.arrayBuffer()));
+    console.log(`Saved ${asset.path}`);
+  }
+};
+
+await Promise.all(Array.from({ length: 6 }, worker));
+console.log(`Downloaded ${assets.length} local image assets.`);

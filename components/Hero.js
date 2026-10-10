@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
-import { slides, img } from "@/lib/data";
+import { slides } from "@/lib/data";
+import Link from "next/link";
+import ProductImage from "./ProductImage";
 
 export default function Hero() {
   const [i, setI] = useState(0);
@@ -12,13 +14,13 @@ export default function Hero() {
     <section className="hero">
       {slides.map((s, idx) => (
         <div key={s.title} className={`slide ${idx === i ? "active" : ""}`} aria-hidden={idx !== i}>
-          <img src={img(s.image)} alt={s.title} />
+          <ProductImage src={s.image} alt={s.title} />
           <div className="overlay" />
           <div className="slide-copy container">
             <p className="eyebrow">{s.eyebrow}</p>
             <h1>{s.title}</h1>
             <p className="lead">{s.text}</p>
-            <a href="#products" className="btn">Shop Now</a>
+            <Link href={s.href} className="btn">Shop Now</Link>
           </div>
         </div>
       ))}

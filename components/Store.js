@@ -1,8 +1,12 @@
 "use client";
 import { useState } from "react";
+import Link from "next/link";
 import Header from "./Header";
 import Hero from "./Hero";
-import { promise, products, categories, footer, img } from "@/lib/data";
+import Footer from "./Footer";
+import ProductCard from "./ProductCard";
+import ProductImage from "./ProductImage";
+import { promise, products, categories } from "@/lib/data";
 
 const icons = {
   ship: <path d="M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a1.5 1.5 0 1 0 0-.01M17 19a1.5 1.5 0 1 0 0-.01" />,
@@ -11,13 +15,12 @@ const icons = {
 };
 
 export default function Store() {
-  const [cart, setCart] = useState(0);
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
 
   return (
     <>
-      <Header cartCount={cart} />
+      <Header />
       <Hero />
 
       <section className="promise container">
@@ -40,33 +43,24 @@ export default function Store() {
             <p className="eyebrow dark">Available now</p>
             <h2>Products</h2>
           </div>
-          <a href="#products" className="link">View all</a>
+          <Link href="/shop" className="link">View all</Link>
         </div>
         <div className="grid">
-          {products.map((p) => (
-            <article key={p.id} className="card">
-              <div className="thumb">
-                <img src={img(p.image)} alt={p.name} loading="lazy" />
-                <button className="add" onClick={() => setCart((c) => c + 1)}>Add to Cart</button>
-              </div>
-              <p className="cat">{p.category}</p>
-              <h3>{p.name}</h3>
-              <p className="price">${p.price.toLocaleString("en-US")}</p>
-            </article>
-          ))}
+          {products.slice(0, 8).map((product) => <ProductCard key={product.id} product={product} />)}
         </div>
       </section>
 
       <section className="container categories">
         <h2>Shop by Category</h2>
         <div className="cat-grid">
-          {categories.map((c) => (
-            <a key={c.name} href="#products" className="cat-tile">
-              <img src={img(c.image)} alt={c.name} loading="lazy" />
-              <span>{c.name}</span>
-            </a>
+          {categories.slice(0, 4).map((category) => (
+            <Link key={category.slug} href={`/categories/${category.slug}`} className="cat-tile">
+              <ProductImage src={category.heroImage} alt={category.name} loading="lazy" />
+              <span>{category.name}</span>
+            </Link>
           ))}
         </div>
+        <Link href="/categories" className="link category-view-all">View all categories</Link>
       </section>
 
       <section className="newsletter">
@@ -80,20 +74,7 @@ export default function Store() {
         </div>
       </section>
 
-      <footer className="footer">
-        <div className="container foot-grid">
-          <div>
-            <a href="/" className="logo">SAC LUXE</a>
-            <p>{footer.tagline}</p>
-          </div>
-          {footer.columns.map((col) => (
-            <div key={col.title}>
-              <h4>{col.title}</h4>
-              <ul>{col.links.map((l) => (<li key={l}><a href="#">{l}</a></li>))}</ul>
-            </div>
-          ))}
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 }
